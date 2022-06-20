@@ -2,7 +2,7 @@ import redis
 import asyncio
 import websockets
 
-redis_url = 'redis://localhost:6379/0'
+redis_url = 'redis://redis:6379/0'
 channel = 'test'
 
 connection = redis.StrictRedis.from_url(redis_url, decode_responses=True)
@@ -28,7 +28,7 @@ async def show_time():
         await asyncio.sleep(0.2)
 
 async def main():
-    async with websockets.serve(register, "localhost", 5679):
+    async with websockets.serve(register, "0.0.0.0", 5679):
         await show_time()
 
 

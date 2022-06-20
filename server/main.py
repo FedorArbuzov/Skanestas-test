@@ -10,4 +10,5 @@ app.add_routes([web.get('/', handle),
                 web.get('/{name}', handle)])
 
 if __name__ == '__main__':
-    web.run_app(app)
+    print('start server')
+    web.run_app(app, host='0.0.0.0', port=8088)
