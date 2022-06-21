@@ -1,14 +1,23 @@
-from aiohttp import web
+import json
 
-async def handle(request):
-    name = request.match_info.get('name', "Anonymous")
-    text = "Hello, " + name
-    return web.Response(text=text)
+import psycopg2
+from flask import Flask, Response, request
+from flask_cors import CORS
 
-app = web.Application()
-app.add_routes([web.get('/', handle),
-                web.get('/{name}', handle)])
+conn = psycopg2.connect(dbname='de1p2j5p2km2h6', user='kwxssaupxgrrgb', 
+                        password='626bb561ad0e823838556918f92bb1eb1d9e8ff5273dcfa62726f103744027f6', host='ec2-54-74-35-87.eu-west-1.compute.amazonaws.com')
+conn.autocommit = True
+cursor = conn.cursor()
+
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/')
+def hello():
+    ticker = request.args.get('ticker')
+    cursor.execute(f"select * from prices where ticker={ticker};")
+    return Response(json.dumps(list(cursor), default=str),  mimetype='application/json')
 
 if __name__ == '__main__':
-    print('start server')
-    web.run_app(app, host='0.0.0.0', port=8088)
+    app.run()

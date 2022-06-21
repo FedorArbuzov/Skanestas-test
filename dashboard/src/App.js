@@ -1,62 +1,19 @@
 import React, {useState, useEffect} from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import Graph from './components/Graph';
+import Tickers from './components/Tickers';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-export const options = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top',
-    },
-    title: {
-      display: true,
-      text: 'Chart.js Line Chart',
-    },
-  },
-};
-
-const labels = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-
-export const data = {
-  labels,
-  datasets: [
-    {
-      label: 'Dataset 1',
-      data: labels.map(() => {return Math.floor(Math.random() * 100)}),
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
-    },
-  ],
-};
+import './App.css';
 
 export function App() {
   const [labels, setLabels] = useState([]);
   const [data, setData] = useState([]);
-  let [idx, setIdx] = useState(100);
+  const [currentPrices, setCurrentPrices] = useState([]);
+  const [selectedTicker, setSelectedTicker] = useState(0)
   const graphData = {
     labels,
     datasets: [
       {
-        label: 'Dataset 1',
+        label: `ticker_${selectedTicker}`,
         data: data,
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -64,17 +21,29 @@ export function App() {
     ],
   };
 
-  useEffect(() => {
-    const localLabels = [];
-    const localData = [];
-    for (let i = 0; i < 10; i++){
-      localLabels.push(i)
-      localData.push(Math.floor(Math.random() * 100))
+  const getAllData = async (ticker) => {
+    console.log(ticker)
+    const response = await fetch(`http://localhost:5000/?ticker=${ticker}`)
+    const responseData = await response.json()
+    console.log(responseData)
+    const localLabels = []
+    const localData = []
+    for(let i = 0; i < responseData.length; i++){
+      localLabels.push(responseData[i][2])
+      localData.push(responseData[i][1])
     }
     setLabels(localLabels)
     setData(localData)
+    setSelectedTicker(ticker)
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getAllData(selectedTicker)
+    }
+    fetchData().catch(console.error)
     const ws = new WebSocket(
-      "ws://localhost:5679"
+      "ws://0.0.0.0:5679"
     );
 
     ws.onopen = () => {
@@ -82,15 +51,10 @@ export function App() {
     };
     ws.onmessage = (event) => {
       const response = JSON.parse(event.data);
-      console.log(response);
-      idx = idx + 1
-      setLabels(labels => [...labels, idx])
-      setData(data => [...data, response])
-      //ws.close();
+      setCurrentPrices(response);
     };
     ws.onclose = () => {
       console.log("Connection Closed!");
-      //initWebsocket();
     };
 
     ws.onerror = () => {
@@ -101,7 +65,22 @@ export function App() {
       ws.close();
     };
   }, []);
-  return <Line options={options} data={graphData} />;
+
+  useEffect(() => {
+      const currentPrice = currentPrices[selectedTicker];
+      if (currentPrice){
+        setLabels(labels => [...labels, currentPrice[2]])
+        setData(data => [...data, currentPrice[1]])
+      }
+  }, [currentPrices])
+
+  return (
+    <>
+      <Graph data={graphData}/>
+      <Tickers data={currentPrices} setMainTicker={getAllData} />
+    </>
+  )
+  ;
 }
 
 

@@ -2,7 +2,7 @@ import redis
 import asyncio
 import websockets
 
-redis_url = 'redis://redis:6379/0'
+redis_url = 'redis://localhost:6379/0'
 channel = 'test'
 
 connection = redis.StrictRedis.from_url(redis_url, decode_responses=True)
