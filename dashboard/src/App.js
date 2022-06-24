@@ -43,7 +43,7 @@ export function App() {
     }
     fetchData().catch(console.error)
     const ws = new WebSocket(
-      "ws://0.0.0.0:5679"
+      "ws://localhost:5679"
     );
 
     ws.onopen = () => {

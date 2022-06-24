@@ -8,4 +8,4 @@ RUN apt-get -y upgrade && apt-get -y update
 
 RUN pip3 install -U pip
 RUN pip3 install -r requirements.txt
-CMD ["python3", "-u", "main.py"]
+CMD ["python3", "main.py"]

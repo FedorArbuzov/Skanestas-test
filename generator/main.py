@@ -7,13 +7,13 @@ import redis
 import psycopg2
 from psycopg2 import sql
 
-conn = psycopg2.connect(dbname='de1p2j5p2km2h6', user='kwxssaupxgrrgb', 
-                        password='626bb561ad0e823838556918f92bb1eb1d9e8ff5273dcfa62726f103744027f6', host='ec2-54-74-35-87.eu-west-1.compute.amazonaws.com')
+conn = psycopg2.connect(dbname='app', user='postgres', 
+                        password='postgres', host='postgres')
 conn.autocommit = True
 cursor = conn.cursor()
-cursor.execute("drop table prices;")
+#cursor.execute("drop table prices;")
 
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(host='redis', port=6379, db=0)
 
 
 def insert_new_prices_chunk(values):

@@ -2,7 +2,7 @@ import redis
 import asyncio
 import websockets
 
-redis_url = 'redis://localhost:6379/0'
+redis_url = 'redis://redis:6379/0'
 channel = 'test'
 
 connection = redis.StrictRedis.from_url(redis_url, decode_responses=True)
@@ -23,7 +23,6 @@ async def show_time():
     for item in pubsub.listen():
         message = item['data']
         if type(message) != int:
-            print(message)
             websockets.broadcast(CONNECTIONS, message)
         await asyncio.sleep(0.2)
 
